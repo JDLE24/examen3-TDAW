@@ -1501,5 +1501,95 @@ hljs.configure({ ignoreUnescapedHTML: true })
         obtenerOrdenes();
     });
 </script>
+
+<script>
+    const apiUrl = '/ordenes';
+    let ordenActualId = null;
+
+    // Cargar órdenes al iniciar
+    document.addEventListener("DOMContentLoaded", cargarOrdenes);
+
+    function cargarOrdenes() {
+        fetch(apiUrl)
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.querySelector("#example tbody");
+                tbody.innerHTML = "";
+
+                data.forEach(orden => {
+                    const row = document.createElement("tr");
+
+                    row.innerHTML = `
+                        <td>${orden.id}</td>
+                        <td>${orden.ordenid}</td>
+                        <td>${orden.productoid}</td>
+                        <td>${orden.cantidad}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="abrirEditar(${orden.id}, ${orden.ordenid}, ${orden.productoid}, ${orden.cantidad})">Editar</button>
+                            <button class="btn btn-sm btn-danger" onclick="abrirEliminar(${orden.id})">Eliminar</button>
+                        </td>
+                    `;
+
+                    tbody.appendChild(row);
+                });
+            });
+    }
+
+    function guardarOrden() {
+        const orden = {
+            ordenid: parseInt(document.getElementById("ordenid_orden").value),
+            productoid: parseInt(document.getElementById("productoid_orden").value),
+            cantidad: parseInt(document.getElementById("cantidad_orden").value),
+        };
+
+        fetch(apiUrl, {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orden)
+        }).then(() => cargarOrdenes());
+    }
+
+    function abrirEditar(id, ordenid, productoid, cantidad) {
+        ordenActualId = id;
+        document.getElementById("ordenid_orden_editar").value = ordenid;
+        document.getElementById("productoid_orden_editar").value = productoid;
+        document.getElementById("cantidad_orden_editar").value = cantidad;
+        new bootstrap.Modal(document.getElementById('editModal')).show();
+    }
+
+    function actualizarOrden() {
+        const ordenActualizada = {
+            ordenid: parseInt(document.getElementById("ordenid_orden_editar").value),
+            productoid: parseInt(document.getElementById("productoid_orden_editar").value),
+            cantidad: parseInt(document.getElementById("cantidad_orden_editar").value),
+        };
+
+        fetch(`${apiUrl}/${ordenActualId}`, {
+            method: "PUT",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(ordenActualizada)
+        }).then(() => {
+            cargarOrdenes();
+            ordenActualId = null;
+        });
+    }
+
+    function abrirEliminar(id) {
+        ordenActualId = id;
+        document.getElementById("ordenid_eliminar").innerText = id;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+
+    function eliminarOrden() {
+        fetch(`${apiUrl}/${ordenActualId}`, {
+            method: "DELETE"
+        }).then(() => {
+            cargarOrdenes();
+            ordenActualId = null;
+        });
+    }
+</script>
+	
+	
 </body>
 </html>
