@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HomeController {
 
     @GetMapping("/")
-    public String home() {
-        return "¡Bienvenido! La API está en funcionamiento.";
+    public String mostrarInicio() {
+        return "index";
     }
 }
